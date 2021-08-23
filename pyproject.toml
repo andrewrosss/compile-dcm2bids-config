@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "compile-dcm2bids-config"
+version = "0.1.0"
+description = "Compile Dcm2Bids configuration files into a single config file."
+authors = ["Andrew Ross <andrew.ross.mail@gmail.com>"]
+license = "MIT"
+
+readme = "README.md"
+
+keywords = ["bids", "dcm2bids", "config", "configuration", "tool"]
+
+homepage = "https://github.com/andrewrosss/compile-dcm2bids-config"
+repository = "https://github.com/andrewrosss/compile-dcm2bids-config"
+documentation = "https://github.com/andrewrosss/compile-dcm2bids-config"
+
+classifiers = [
+    "Programming Language :: Python :: 3.0",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Development Status :: 4 - Beta",
+    "Typing :: Typed",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.6.2,<4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+black = "^21.7b0"
+flake8 = "^3.9.2"
+pylint = "^2.10.2"
+reorder-python-imports = "^2.6.0"
+pre-commit = "^2.14.0"
+bump2version = "^1.0.1"
+
+[tool.poetry.scripts]
+compile-dcm2bids-config = "compile_dcm2bids_config:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
