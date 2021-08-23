@@ -1,6 +1,11 @@
 # compile-dcm2bids-config
 
-A small script intended to combine `dcm2bids` config files into a single config file while preserving the integrity of each separate config file's various `IntendedFor` fields.
+Combine `dcm2bids` config files into a single config file while preserving the integrity of each separate config file's various `IntendedFor` fields.
+
+[![PyPI Version](https://img.shields.io/pypi/v/compile-dcm2bids-config.svg)](https://pypi.org/project/compile-dcm2bids-config/)
+[![Tests](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/test.yaml/badge.svg)](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/test.yaml)
+[![Code Style](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/lint.yaml/badge.svg)](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/lint.yaml)
+[![Type Check](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/type-check.yaml/badge.svg)](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/type-check.yaml)
 
 ## Usage
 
