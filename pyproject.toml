@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "compile-dcm2bids-config"
-version = "0.1.0"
+version = "0.1.1"
 description = "Compile Dcm2Bids configuration files into a single config file."
 authors = ["Andrew Ross <andrew.ross.mail@gmail.com>"]
 license = "MIT"

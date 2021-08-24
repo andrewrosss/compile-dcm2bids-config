@@ -11,7 +11,7 @@ from typing import List
 from typing import Union
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 def main():
