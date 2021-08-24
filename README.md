@@ -86,7 +86,7 @@ Suppose you have two config files:
       "criteria": {
         "SidecarFilename": "*echo-3*"
       },
-      "IntendedFor": 2
+      "IntendedFor": [0, 2]
     }
   ]
 }
@@ -111,7 +111,9 @@ $ compile-dcm2bids-config example/config1.json example/config2.json
       "criteria": {
         "SidecarFilename": "*echo-4*"
       },
-      "IntendedFor": 0
+      "IntendedFor": [
+        0
+      ]
     },
     {
       "dataType": "dwi",
@@ -144,13 +146,18 @@ $ compile-dcm2bids-config example/config1.json example/config2.json
       "criteria": {
         "SidecarFilename": "*echo-3*"
       },
-      "IntendedFor": 4
+      "IntendedFor": [
+        2,
+        4
+      ]
     }
   ]
 }
 ```
 
 Notice that the `IntendedFor` fields have been updated appropriately.
+
+> **NOTE**: Other fields at the top level of the config file (i.e. at the same level as `descriptions`), for example: `searchMethod` or `defaceTpl`, are omitted in the merged config file output by `compile-dcm2bids-config`. Since different config file may have different top-level paramters it is upto the user to determine which parameters should be retained and/or whether or not it makes sense to even combine the provided configuration files.
 
 ## Python API
 
@@ -181,7 +188,7 @@ The result being:
                   {'dataType': 'fmap',
                    'modalityLabel': 'fmap',
                    'criteria': {'SidecarFilename': '*echo-4*'},
-                   'IntendedFor': 0},
+                   'IntendedFor': [0]},
                   {'dataType': 'dwi',
                    'modalityLabel': 'dwi',
                    'criteria': {'SeriesDescription': '*DWI*'}},
@@ -196,7 +203,7 @@ The result being:
                   {'dataType': 'fmap',
                    'modalityLabel': 'fmap',
                    'criteria': {'SidecarFilename': '*echo-3*'},
-                   'IntendedFor': 4}]}
+                   'IntendedFor': [2, 4]}]}
 ```
 
 ## Contributing
