@@ -20,12 +20,12 @@ from compile_dcm2bids_config import combine_config
             [{"descriptions": [{}, {}]}, {"descriptions": [{}, {}, {}]}],
             {"descriptions": [{}, {}, {}, {}, {}]},
         ),
-        # one config, descriptions with IntendedFor
+        # one config, descriptions with integer IntendedFor
         (
             [{"descriptions": [{}, {"IntendedFor": 0}, {}, {"IntendedFor": 2}]}],
-            {"descriptions": [{}, {"IntendedFor": 0}, {}, {"IntendedFor": 2}]},
+            {"descriptions": [{}, {"IntendedFor": [0]}, {}, {"IntendedFor": [2]}]},
         ),
-        # multiple configs, descriptions with IntendedFor
+        # multiple configs, descriptions with integer IntendedFor
         (
             [
                 {"descriptions": [{}, {"IntendedFor": 0}, {}, {"IntendedFor": 2}]},
@@ -34,12 +34,12 @@ from compile_dcm2bids_config import combine_config
             {
                 "descriptions": [
                     {},
-                    {"IntendedFor": 0},
+                    {"IntendedFor": [0]},
                     {},
-                    {"IntendedFor": 2},
+                    {"IntendedFor": [2]},
                     {},
                     {},
-                    {"IntendedFor": 5},
+                    {"IntendedFor": [5]},
                     {},
                 ],
             },
