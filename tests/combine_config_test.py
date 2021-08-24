@@ -20,12 +20,12 @@ from compile_dcm2bids_config import combine_config
             [{"descriptions": [{}, {}]}, {"descriptions": [{}, {}, {}]}],
             {"descriptions": [{}, {}, {}, {}, {}]},
         ),
-        # one config, descriptions with IntendedFor
+        # one config, descriptions with integer IntendedFor
         (
             [{"descriptions": [{}, {"IntendedFor": 0}, {}, {"IntendedFor": 2}]}],
-            {"descriptions": [{}, {"IntendedFor": 0}, {}, {"IntendedFor": 2}]},
+            {"descriptions": [{}, {"IntendedFor": [0]}, {}, {"IntendedFor": [2]}]},
         ),
-        # multiple configs, descriptions with IntendedFor
+        # multiple configs, descriptions with integer IntendedFor
         (
             [
                 {"descriptions": [{}, {"IntendedFor": 0}, {}, {"IntendedFor": 2}]},
@@ -34,12 +34,122 @@ from compile_dcm2bids_config import combine_config
             {
                 "descriptions": [
                     {},
-                    {"IntendedFor": 0},
+                    {"IntendedFor": [0]},
                     {},
-                    {"IntendedFor": 2},
+                    {"IntendedFor": [2]},
                     {},
                     {},
-                    {"IntendedFor": 5},
+                    {"IntendedFor": [5]},
+                    {},
+                ],
+            },
+        ),
+        # one config, descriptions with length-one list as IntendedFor
+        (
+            [{"descriptions": [{}, {"IntendedFor": [0]}, {}, {"IntendedFor": [2]}]}],
+            {"descriptions": [{}, {"IntendedFor": [0]}, {}, {"IntendedFor": [2]}]},
+        ),
+        # one config, descriptions with mixed-type IntendedFor
+        (
+            [{"descriptions": [{}, {"IntendedFor": [0]}, {}, {"IntendedFor": 2}]}],
+            {"descriptions": [{}, {"IntendedFor": [0]}, {}, {"IntendedFor": [2]}]},
+        ),
+        # one config, descriptions with list as IntendedFor
+        (
+            [
+                {
+                    "descriptions": [
+                        {},
+                        {},
+                        {"IntendedFor": [0, 1]},
+                        {},
+                        {"IntendedFor": [3]},
+                    ],
+                },
+            ],
+            {
+                "descriptions": [
+                    {},
+                    {},
+                    {"IntendedFor": [0, 1]},
+                    {},
+                    {"IntendedFor": [3]},
+                ],
+            },
+        ),
+        # multiple configs, descriptions with length-one list IntendedFor
+        (
+            [
+                {"descriptions": [{}, {"IntendedFor": [0]}, {}, {"IntendedFor": [2]}]},
+                {"descriptions": [{}, {}, {"IntendedFor": [1]}, {}]},
+            ],
+            {
+                "descriptions": [
+                    {},
+                    {"IntendedFor": [0]},
+                    {},
+                    {"IntendedFor": [2]},
+                    {},
+                    {},
+                    {"IntendedFor": [5]},
+                    {},
+                ],
+            },
+        ),
+        # multiple configs, descriptions with list IntendedFor
+        (
+            [
+                {
+                    "descriptions": [
+                        {},
+                        {},
+                        {"IntendedFor": [0, 1]},
+                        {},
+                        {"IntendedFor": [3]},
+                    ],
+                },
+                {"descriptions": [{}, {}, {}, {"IntendedFor": [1, 4]}, {}]},
+            ],
+            {
+                "descriptions": [
+                    {},
+                    {},
+                    {"IntendedFor": [0, 1]},
+                    {},
+                    {"IntendedFor": [3]},
+                    {},
+                    {},
+                    {},
+                    {"IntendedFor": [6, 9]},
+                    {},
+                ],
+            },
+        ),
+        # multiple configs, descriptions with mixed-type IntendedFor
+        (
+            [
+                {
+                    "descriptions": [
+                        {},
+                        {},
+                        {"IntendedFor": [0, 3]},
+                        {},
+                        {"IntendedFor": 3},
+                    ],
+                },
+                {"descriptions": [{}, {}, {}, {"IntendedFor": 4}, {}]},
+            ],
+            {
+                "descriptions": [
+                    {},
+                    {},
+                    {"IntendedFor": [0, 3]},
+                    {},
+                    {"IntendedFor": [3]},
+                    {},
+                    {},
+                    {},
+                    {"IntendedFor": [9]},
                     {},
                 ],
             },

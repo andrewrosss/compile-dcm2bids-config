@@ -31,7 +31,10 @@
       "criteria": {
         "SidecarFilename": "*echo-3*"
       },
-      "IntendedFor": 2
+      "IntendedFor": [
+        0,
+        2
+      ]
     }
   ]
 }

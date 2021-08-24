@@ -81,10 +81,13 @@ def _reduce_callback(agg: _ReduceResult, config: Dict[str, Any]) -> _ReduceResul
     descriptions: List[Dict[str, Any]] = config["descriptions"]
 
     for description in descriptions:
-        intendedFor: Union[int, None] = description.get("IntendedFor")
+        intendedFor: Union[int, List[int], None] = description.get("IntendedFor")
         if intendedFor is None:
             continue
-        description["IntendedFor"] = intendedFor + agg.offset
+        elif isinstance(intendedFor, int):
+            description["IntendedFor"] = [intendedFor + agg.offset]
+        else:
+            description["IntendedFor"] = [i + agg.offset for i in intendedFor]
 
     agg.descriptions.extend(descriptions)
     agg.offset = agg.offset + len(descriptions)
