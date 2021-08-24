@@ -41,6 +41,7 @@ def _create_parser() -> argparse.ArgumentParser:
         help="The file to write the combined config file to. If not "
         "specified outputs are written to stdout.",
     )
+    parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.set_defaults(handler=_handler)
 
     return parser
