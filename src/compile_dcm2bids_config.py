@@ -56,7 +56,8 @@ def _handler(args: argparse.Namespace):
     combined_config = combine_config(configs)
     # write the combined config file to disk
     with out_file as f:
-        json.dump(combined_config, f, indent=2)
+        # we output like this because json.dump(obj, f) doesn't add a trailing new-line
+        f.write(json.dumps(combined_config, indent=2) + "\n")
 
 
 def combine_config(input_configs: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -86,7 +87,7 @@ def _reduce_callback(agg: _ReduceResult, config: Dict[str, Any]) -> _ReduceResul
         if intendedFor is None:
             continue
         elif isinstance(intendedFor, int):
-            description["IntendedFor"] = [intendedFor + agg.offset]
+            description["IntendedFor"] = intendedFor + agg.offset
         else:
             description["IntendedFor"] = [i + agg.offset for i in intendedFor]
 
