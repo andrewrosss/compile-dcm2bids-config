@@ -1,6 +1,6 @@
 # compile-dcm2bids-config
 
-Combine `dcm2bids` config files into a single config file while preserving the integrity of each separate config file's various `IntendedFor` fields.
+Combine [`dcm2bids`](https://github.com/unfmontreal/Dcm2Bids) config files into a single config file while preserving the integrity of each separate config file's various `IntendedFor` fields.
 
 [![PyPI Version](https://img.shields.io/pypi/v/compile-dcm2bids-config.svg)](https://pypi.org/project/compile-dcm2bids-config/)
 [![Tests](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/test.yaml/badge.svg)](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/test.yaml)
@@ -11,7 +11,7 @@ Combine `dcm2bids` config files into a single config file while preserving the i
 
 ```bash
 $ compile-dcm2bids-config --help
-usage: compile-dcm2bids-config [-h] [-o OUT_FILE] in_file [in_file ...]
+usage: compile-dcm2bids-config [-h] [-o OUT_FILE] [-v] in_file [in_file ...]
 
 Combine multiple dcm2bids config files into a single config file.
 
@@ -21,15 +21,18 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -o OUT_FILE, --out-file OUT_FILE
-                        The file to write the combined config file to. If not specified outputs are written to stdout.
+                        The file to write the combined config file to. If not specified
+                        outputs are written to stdout.
+  -v, --version         show program's version number and exit
 ```
 
 ## Getting Started
 
 Suppose you have two config files:
 
+**`example/config1.json`:**
+
 ```json
-// example/config1.json
 {
   "descriptions": [
     {
@@ -51,8 +54,9 @@ Suppose you have two config files:
 }
 ```
 
+**`example/config2.json`:**
+
 ```json
-// example/config2.json
 {
   "descriptions": [
     {
@@ -111,9 +115,7 @@ $ compile-dcm2bids-config example/config1.json example/config2.json
       "criteria": {
         "SidecarFilename": "*echo-4*"
       },
-      "IntendedFor": [
-        0
-      ]
+      "IntendedFor": 0
     },
     {
       "dataType": "dwi",
@@ -188,7 +190,7 @@ The result being:
                   {'dataType': 'fmap',
                    'modalityLabel': 'fmap',
                    'criteria': {'SidecarFilename': '*echo-4*'},
-                   'IntendedFor': [0]},
+                   'IntendedFor': 0},
                   {'dataType': 'dwi',
                    'modalityLabel': 'dwi',
                    'criteria': {'SeriesDescription': '*DWI*'}},
@@ -216,7 +218,3 @@ The result being:
 1. Add your changes (adding/updating tests is always nice too)
 1. Commit your changes + push to your fork
 1. Open a PR
-
-## TODO
-
-- Add e2e tests
