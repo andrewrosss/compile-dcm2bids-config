@@ -12,10 +12,12 @@ def test_cli(datadir: Path):
 
     res = subprocess.run(
         ("compile-dcm2bids-config", config1, config2),
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         check=True,
-        text=True,
+        encoding="utf8",
     )
 
+    assert res.returncode == 0
     assert res.stderr == ""
     assert res.stdout == expected.read_text()
