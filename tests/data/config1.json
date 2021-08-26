@@ -1,0 +1,19 @@
+{
+  "descriptions": [
+    {
+      "dataType": "anat",
+      "modalityLabel": "SWI",
+      "criteria": {
+        "SeriesDescription": "*SWI*"
+      }
+    },
+    {
+      "dataType": "fmap",
+      "modalityLabel": "fmap",
+      "criteria": {
+        "SidecarFilename": "*echo-4*"
+      },
+      "IntendedFor": 0
+    }
+  ]
+}
