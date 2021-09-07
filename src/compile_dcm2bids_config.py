@@ -48,7 +48,7 @@ def _create_parser() -> argparse.ArgumentParser:
 
 
 def _handler(args: argparse.Namespace):
-    in_files: List[Path] = args.in_file
+    in_files: list[Path] = args.in_file
     out_file: TextIOWrapper = args.out_file
     # load all the config files passed as arguments
     configs = [json.loads(fp.read_text()) for fp in in_files]
@@ -64,10 +64,10 @@ def combine_config(input_configs: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Combine multiple dcm2bids config dicts into a single config dict.
 
     Args:
-        input_configs (List[Dict[str, Any]]): A list of dcm2bids configs (dicts)
+        input_configs (list[dict[str, Any]]): A list of dcm2bids configs (dicts)
 
     Returns:
-        Dict[str, Any]: The combined/merged config dict.
+        dict[str, Any]: The combined/merged config dict.
     """
     res = functools.reduce(_reduce_callback, input_configs, _ReduceResult())
     return {"descriptions": res.descriptions}
@@ -79,17 +79,34 @@ class _ReduceResult:
     descriptions: List[Dict[str, Any]] = field(default_factory=list)
 
 
+TIntendedFor = Union[int, str, List[Union[int, str]], None]
+
+
 def _reduce_callback(agg: _ReduceResult, config: Dict[str, Any]) -> _ReduceResult:
     descriptions: List[Dict[str, Any]] = config["descriptions"]
 
     for description in descriptions:
-        intendedFor: Union[int, List[int], None] = description.get("IntendedFor")
-        if intendedFor is None:
+        intended_for: TIntendedFor = description.get("IntendedFor")
+        if intended_for is None:
             continue
-        elif isinstance(intendedFor, int):
-            description["IntendedFor"] = intendedFor + agg.offset
+        elif isinstance(intended_for, str):
+            description["IntendedFor"] = intended_for
+        elif isinstance(intended_for, int):
+            description["IntendedFor"] = intended_for + agg.offset
+        elif isinstance(intended_for, list):
+            _intended_for: List[Union[int, str]] = []
+            for i in intended_for:
+                if isinstance(i, str):
+                    _intended_for.append(i)
+                elif isinstance(i, int):
+                    _intended_for.append(i + agg.offset)
+                else:
+                    m = f"IntendedFor must be 'int' or 'str'. Found [{_intended_for}]"
+                    raise ValueError(m)
+            description["IntendedFor"] = _intended_for
         else:
-            description["IntendedFor"] = [i + agg.offset for i in intendedFor]
+            m = f"IntendedFor must be int, str or (int | str)[]. Found [{intended_for}]"
+            raise ValueError(m)
 
     agg.descriptions.extend(descriptions)
     agg.offset = agg.offset + len(descriptions)
