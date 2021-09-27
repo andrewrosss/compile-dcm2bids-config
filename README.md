@@ -74,6 +74,7 @@ Suppose you have two config files:
       }
     },
     {
+      "id": "my-func",
       "dataType": "func",
       "modalityLabel": "bold",
       "customLabels": "task-rest",
@@ -90,7 +91,7 @@ Suppose you have two config files:
       "criteria": {
         "SidecarFilename": "*echo-3*"
       },
-      "IntendedFor": [0, 2]
+      "IntendedFor": [0, "my-func"]
     }
   ]
 }
@@ -132,6 +133,7 @@ $ compile-dcm2bids-config example/config1.json example/config2.json
       }
     },
     {
+      "id": "my-func",
       "dataType": "func",
       "modalityLabel": "bold",
       "customLabels": "task-rest",
@@ -150,7 +152,7 @@ $ compile-dcm2bids-config example/config1.json example/config2.json
       },
       "IntendedFor": [
         2,
-        4
+        "my-func"
       ]
     }
   ]
@@ -158,8 +160,6 @@ $ compile-dcm2bids-config example/config1.json example/config2.json
 ```
 
 Notice that the `IntendedFor` fields have been updated appropriately.
-
-> **NOTE**: Other fields at the top level of the config file (i.e. at the same level as `descriptions`), for example: `searchMethod` or `defaceTpl`, are omitted in the merged config file output by `compile-dcm2bids-config`. Since different config file may have different top-level paramters it is upto the user to determine which parameters should be retained and/or whether or not it makes sense to even combine the provided configuration files.
 
 ## Python API
 
@@ -197,7 +197,8 @@ The result being:
                   {'dataType': 'anat',
                    'modalityLabel': 'SWI',
                    'criteria': {'SeriesDescription': '*SWI*'}},
-                  {'dataType': 'func',
+                  {'id': 'my-func',
+                   'dataType': 'func',
                    'modalityLabel': 'bold',
                    'customLabels': 'task-rest',
                    'criteria': {'SeriesDescription': 'rs_fMRI'},
@@ -205,7 +206,7 @@ The result being:
                   {'dataType': 'fmap',
                    'modalityLabel': 'fmap',
                    'criteria': {'SidecarFilename': '*echo-3*'},
-                   'IntendedFor': [2, 4]}]}
+                   'IntendedFor': [2, 'my-func']}]}
 ```
 
 ## Contributing

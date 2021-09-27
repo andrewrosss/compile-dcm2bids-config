@@ -15,6 +15,7 @@
       }
     },
     {
+      "id": "my-func",
       "dataType": "func",
       "modalityLabel": "bold",
       "customLabels": "task-rest",
@@ -33,7 +34,7 @@
       },
       "IntendedFor": [
         0,
-        2
+        "my-func"
       ]
     }
   ]
