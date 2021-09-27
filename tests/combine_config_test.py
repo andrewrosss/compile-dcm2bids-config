@@ -5,6 +5,7 @@ from typing import List
 import pytest
 from compile_dcm2bids_config import combine_config
 from compile_dcm2bids_config import DescriptionIdError
+from compile_dcm2bids_config import TopLevelParameterError
 
 
 @pytest.mark.parametrize(
@@ -346,34 +347,44 @@ def test_combine_configs(
 
 
 @pytest.mark.parametrize(
-    ("configs"),
+    ("configs", "expected"),
     [
-        # ID collision, different configs
         (
             [
-                {"descriptions": [{"id": "some-id"}, {}, {}, {}, {}]},
-                {"descriptions": [{}, {"id": "some-id"}]},
-            ]
+                {"a": 1, "descriptions": [{}, {}]},
+                {"descriptions": [{}]},
+            ],
+            {"a": 1, "descriptions": [{}, {}, {}]},
         ),
         (
             [
-                {"descriptions": [{"id": "some-id"}, {}, {}, {}, {}]},
-                {"descriptions": [{}, {"id": "some-id"}, {}]},
-                {"descriptions": [{}, {}, {}, {"id": "some-id"}]},
-            ]
+                {"a": 1, "descriptions": [{}]},
+                {"b": 2, "descriptions": [{}]},
+            ],
+            {"a": 1, "b": 2, "descriptions": [{}, {}]},
         ),
-        # ID collision, same configs
         (
             [
-                {"descriptions": [{"id": "some-id"}, {}, {"id": "some-id"}, {}, {}]},
-                {"descriptions": [{}, {}, {}]},
-            ]
+                {"a": 1, "descriptions": [{}]},
+                {"a": 1, "descriptions": [{}]},
+            ],
+            {"a": 1, "descriptions": [{}, {}]},
+        ),
+        (
+            [
+                {"a": 1, "descriptions": [{}]},
+                {"a": 2, "descriptions": [{}]},
+            ],
+            TopLevelParameterError,
         ),
     ],
 )
-def test_combine_configs_with_duplicate_ids_default_behaviour(configs):
-    with pytest.raises(DescriptionIdError):
-        combine_config(configs)
+def test_combine_configs_top_level(configs, expected):
+    if isinstance(expected, dict):
+        assert combine_config(configs) == expected
+    else:
+        with pytest.raises(expected):
+            combine_config(configs)
 
 
 @pytest.mark.parametrize(
@@ -402,6 +413,6 @@ def test_combine_configs_with_duplicate_ids_default_behaviour(configs):
         ),
     ],
 )
-def test_combine_configs_with_duplicate_ids_and_behaviour_is_raise(configs):
+def test_combine_configs_with_duplicate_ids(configs):
     with pytest.raises(DescriptionIdError):
         combine_config(configs)
