@@ -72,18 +72,35 @@ def combine_config(input_configs: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
 
     config_collection = ConfigCollection(input_configs)
-    return {"descriptions": list(config_collection.descriptions())}
+    return config_collection.combined()
 
 
 @dataclass
 class ConfigCollection:
     configs: List[Dict[str, Any]] = field(default_factory=list)
 
+    def combined(self):
+        return {**self.top_level_params(), "descriptions": list(self.descriptions())}
+
+    def top_level_params(self):
+        params = {}
+        for config in self.configs:
+            c = deepcopy(config)
+            c.pop("descriptions", None)
+            for k, v in c.items():
+                if k in params and params[k] != v:
+                    raise TopLevelParameterError(k, params[k], v)
+                params[k] = v
+
+        return params
+
     def descriptions(self) -> Iterator[Dict[str, Any]]:
         seen_ids = set()
         offset = 0
         for config in self.configs:
-            descriptions: List[Dict[str, Any]] = config["descriptions"]
+            descriptions: Union[List[Dict[str, Any]], None] = config.get("descriptions")
+            if descriptions is None:
+                continue
             for description in descriptions:
                 desc_id = description.get("id")
                 if isinstance(desc_id, str) and desc_id in seen_ids:
@@ -126,20 +143,25 @@ def update_intended_for(description: Dict[str, Any], offset: int) -> Dict[str, A
     return _description
 
 
-@dataclass
-class Description:
-    id: Union[str, None]
-    data: Dict[str, Any]
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
-        return cls(id=data.get("id"), data=data)
+class ConfigurationConflictError(ValueError):
+    """Conflicting configuration values"""
 
 
-class DescriptionIdError(ValueError):
+class TopLevelParameterError(ConfigurationConflictError):
+    def __init__(self, parameter, value1, value2):
+        self.parameter = parameter
+        self.value1 = value1
+        self.value2 = value2
+        super().__init__(
+            f"Cannot reconcile values [{self.value1!r}] and [{self.value2!r}] "
+            f"for top-level configuration parameter [{parameter!r}]",
+        )
+
+
+class DescriptionIdError(ConfigurationConflictError):
     def __init__(self, description_id: str):
         self.description_id = description_id
-        super().__init__(f"Found multiple descriptions with ID [{description_id}]")
+        super().__init__(f"Found multiple descriptions with ID [{description_id!r}]")
 
 
 if __name__ == "__main__":
