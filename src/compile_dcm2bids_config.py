@@ -12,7 +12,7 @@ from typing import List
 from typing import Union
 
 
-__version__ = "1.2.0"
+__version__ = "1.2.0.post0"
 
 
 def main():
