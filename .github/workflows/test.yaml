@@ -30,4 +30,10 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          pytest --doctest-modules tests/ src/
+          pytest --doctest-modules --cov=src/ --cov-report=term-missing --cov-report=xml src/ tests/
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: true
