@@ -1,12 +1,13 @@
 import argparse
-import functools
 import json
+from copy import deepcopy
 from dataclasses import dataclass
 from dataclasses import field
 from io import TextIOWrapper
 from pathlib import Path
 from typing import Any
 from typing import Dict
+from typing import Iterator
 from typing import List
 from typing import Union
 
@@ -69,49 +70,76 @@ def combine_config(input_configs: List[Dict[str, Any]]) -> Dict[str, Any]:
     Returns:
         dict[str, Any]: The combined/merged config dict.
     """
-    res = functools.reduce(_reduce_callback, input_configs, _ReduceResult())
-    return {"descriptions": res.descriptions}
+
+    config_collection = ConfigCollection(input_configs)
+    return {"descriptions": list(config_collection.descriptions())}
 
 
 @dataclass
-class _ReduceResult:
-    offset: int = 0
-    descriptions: List[Dict[str, Any]] = field(default_factory=list)
+class ConfigCollection:
+    configs: List[Dict[str, Any]] = field(default_factory=list)
+
+    def descriptions(self) -> Iterator[Dict[str, Any]]:
+        seen_ids = set()
+        offset = 0
+        for config in self.configs:
+            descriptions: List[Dict[str, Any]] = config["descriptions"]
+            for description in descriptions:
+                desc_id = description.get("id")
+                if isinstance(desc_id, str) and desc_id in seen_ids:
+                    raise DescriptionIdError(desc_id)
+                elif isinstance(desc_id, str):
+                    seen_ids.add(desc_id)
+
+                yield update_intended_for(description, offset)
+
+            offset += len(descriptions)
 
 
 TIntendedFor = Union[int, str, List[Union[int, str]], None]
 
 
-def _reduce_callback(agg: _ReduceResult, config: Dict[str, Any]) -> _ReduceResult:
-    descriptions: List[Dict[str, Any]] = config["descriptions"]
+def update_intended_for(description: Dict[str, Any], offset: int) -> Dict[str, Any]:
+    _description = deepcopy(description)
+    intended_for: TIntendedFor = _description.get("IntendedFor")
+    if intended_for is None:
+        return _description
+    elif isinstance(intended_for, str):
+        _description["IntendedFor"] = intended_for
+    elif isinstance(intended_for, int):
+        _description["IntendedFor"] = intended_for + offset
+    elif isinstance(intended_for, list):
+        _intended_for: List[Union[int, str]] = []
+        for i in intended_for:
+            if isinstance(i, str):
+                _intended_for.append(i)
+            elif isinstance(i, int):
+                _intended_for.append(i + offset)
+            else:
+                m = f"IntendedFor must be 'int' or 'str'. Found [{_intended_for}]"
+                raise ValueError(m)
+        _description["IntendedFor"] = _intended_for
+    else:
+        m = f"IntendedFor must be int, str or (int | str)[]. Found [{intended_for}]"
+        raise ValueError(m)
 
-    for description in descriptions:
-        intended_for: TIntendedFor = description.get("IntendedFor")
-        if intended_for is None:
-            continue
-        elif isinstance(intended_for, str):
-            description["IntendedFor"] = intended_for
-        elif isinstance(intended_for, int):
-            description["IntendedFor"] = intended_for + agg.offset
-        elif isinstance(intended_for, list):
-            _intended_for: List[Union[int, str]] = []
-            for i in intended_for:
-                if isinstance(i, str):
-                    _intended_for.append(i)
-                elif isinstance(i, int):
-                    _intended_for.append(i + agg.offset)
-                else:
-                    m = f"IntendedFor must be 'int' or 'str'. Found [{_intended_for}]"
-                    raise ValueError(m)
-            description["IntendedFor"] = _intended_for
-        else:
-            m = f"IntendedFor must be int, str or (int | str)[]. Found [{intended_for}]"
-            raise ValueError(m)
+    return _description
 
-    agg.descriptions.extend(descriptions)
-    agg.offset = agg.offset + len(descriptions)
 
-    return agg
+@dataclass
+class Description:
+    id: Union[str, None]
+    data: Dict[str, Any]
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        return cls(id=data.get("id"), data=data)
+
+
+class DescriptionIdError(ValueError):
+    def __init__(self, description_id: str):
+        self.description_id = description_id
+        super().__init__(f"Found multiple descriptions with ID [{description_id}]")
 
 
 if __name__ == "__main__":
