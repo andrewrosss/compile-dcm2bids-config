@@ -11,6 +11,10 @@ from typing import Iterator
 from typing import List
 from typing import Union
 
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 __version__ = "1.2.0.post0"
 
@@ -52,13 +56,26 @@ def _handler(args: argparse.Namespace):
     in_files: list[Path] = args.in_file
     out_file: TextIOWrapper = args.out_file
     # load all the config files passed as arguments
-    configs = [json.loads(fp.read_text()) for fp in in_files]
+    configs = [load_config_file(fp) for fp in in_files]
     # combine the config files into one config
     combined_config = combine_config(configs)
     # write the combined config file to disk
     with out_file as f:
         # we output like this because json.dump(obj, f) doesn't add a trailing new-line
         f.write(json.dumps(combined_config, indent=2) + "\n")
+
+
+def load_config_file(fp: Path) -> Dict[str, Any]:
+    if fp.suffix in (".yml", ".yaml"):
+        if yaml is None:
+            msg = (
+                f"Trying to load yaml file [{fp}] without PyYAML installed. "
+                "Install this package with the extra 'yaml' dependencies, for "
+                "example: 'pip install compile-dcm2bids-config[yaml]'"
+            )
+            raise ValueError(msg)
+        return yaml.load(fp.read_text(), Loader=yaml.SafeLoader)
+    return json.loads(fp.read_text())
 
 
 def combine_config(input_configs: List[Dict[str, Any]]) -> Dict[str, Any]:

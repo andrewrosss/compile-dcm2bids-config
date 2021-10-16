@@ -7,6 +7,20 @@ Combine [`dcm2bids`](https://github.com/unfmontreal/Dcm2Bids) config files into 
 [![Code Style](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/lint.yaml/badge.svg)](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/lint.yaml)
 [![Type Check](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/type-check.yaml/badge.svg)](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/type-check.yaml)
 
+## Installation
+
+For the basic functionality:
+
+```bash
+pip install compile-dcm2bids-config
+```
+
+If you have config files written in YAML you can install the `yaml` extra, for example:
+
+```bash
+pip install 'compile-dcm2bids-config[yaml]'
+```
+
 ## Usage
 
 ```bash
