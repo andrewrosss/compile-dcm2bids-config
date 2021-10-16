@@ -16,7 +16,7 @@ try:
 except ImportError:
     yaml = None
 
-__version__ = "1.2.0.post0"
+__version__ = "1.3.0"
 
 
 def main():
