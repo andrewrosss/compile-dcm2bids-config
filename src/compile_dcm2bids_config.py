@@ -70,7 +70,6 @@ def _handler(args: argparse.Namespace):
     combined_config = combine_config(configs)
     # write the combined config file to disk
     with out_file as f:
-        # we output like this because json.dump(obj, f) doesn't add a trailing new-line
         f.write(serialize_config(combined_config, to_yaml=to_yaml))
 
 
