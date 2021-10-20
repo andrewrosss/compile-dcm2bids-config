@@ -210,7 +210,7 @@ class DescriptionIdError(ConfigurationConflictError):
 
 
 class NoYamlParserError(ValueError):
-    def __init__(self, msg: str | None):
+    def __init__(self, msg: Union[str, None]):
         default_message = "Trying to process YAML data with no YAML parser installed"
         super().__init__(msg or default_message)
 
