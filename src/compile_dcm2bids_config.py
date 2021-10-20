@@ -16,6 +16,7 @@ try:
 except ImportError:
     yaml = None
 
+
 __version__ = "1.3.0"
 
 
@@ -46,6 +47,13 @@ def _create_parser() -> argparse.ArgumentParser:
         help="The file to write the combined config file to. If not "
         "specified outputs are written to stdout.",
     )
+    if yaml is not None:
+        parser.add_argument(
+            "--to-yaml",
+            action="store_true",
+            default=False,
+            help="Format the output as YAML.",
+        )
     parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.set_defaults(handler=_handler)
 
@@ -55,6 +63,7 @@ def _create_parser() -> argparse.ArgumentParser:
 def _handler(args: argparse.Namespace):
     in_files: list[Path] = args.in_file
     out_file: TextIOWrapper = args.out_file
+    to_yaml: bool = getattr(args, "to_yaml", False)
     # load all the config files passed as arguments
     configs = [load_config_file(fp) for fp in in_files]
     # combine the config files into one config
@@ -62,7 +71,7 @@ def _handler(args: argparse.Namespace):
     # write the combined config file to disk
     with out_file as f:
         # we output like this because json.dump(obj, f) doesn't add a trailing new-line
-        f.write(json.dumps(combined_config, indent=2) + "\n")
+        f.write(serialize_config(combined_config, to_yaml=to_yaml))
 
 
 def load_config_file(fp: Path) -> Dict[str, Any]:
@@ -76,6 +85,20 @@ def load_config_file(fp: Path) -> Dict[str, Any]:
             raise ValueError(msg)
         return yaml.load(fp.read_text(), Loader=yaml.SafeLoader)
     return json.loads(fp.read_text())
+
+
+def serialize_config(data: Dict[str, Any], to_yaml: bool = False) -> str:
+    if to_yaml:
+        if yaml is None:
+            msg = (
+                "Trying to write combined config as yaml without PyYAML installed. "
+                "Install this package with the extra 'yaml' dependencies, for "
+                "example: pip install 'compile-dcm2bids-config[yaml]'"
+            )
+            raise ValueError(msg)
+
+        return yaml.dump(data, Dumper=yaml_dumper_factory(), sort_keys=False)
+    return json.dumps(data, indent=2) + "\n"
 
 
 def combine_config(input_configs: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -179,6 +202,20 @@ class DescriptionIdError(ConfigurationConflictError):
     def __init__(self, description_id: str):
         self.description_id = description_id
         super().__init__(f"Found multiple descriptions with ID [{description_id!r}]")
+
+
+def yaml_dumper_factory():
+    if yaml is None:
+        msg = "Trying to create YAML Dumper class but PyYAML is not installed"
+        raise ValueError(msg)
+
+    # Custom Dumper class so that lists are indented nicely, see this
+    # issue comment: https://github.com/yaml/pyyaml/issues/234#issuecomment-765894586
+    class Dumper(yaml.Dumper):
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow=flow, indentless=False)
+
+    return Dumper
 
 
 if __name__ == "__main__":
