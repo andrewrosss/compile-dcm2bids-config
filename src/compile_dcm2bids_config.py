@@ -12,7 +12,7 @@ from typing import List
 from typing import Union
 
 try:
-    import yaml
+    import yaml  # type: ignore
 except ImportError:
     yaml = None
 
@@ -39,6 +39,7 @@ def _create_parser() -> argparse.ArgumentParser:
         type=Path,
         help="The JSON config files to combine",
     )
+    parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.add_argument(
         "-o",
         "--out-file",
@@ -54,7 +55,6 @@ def _create_parser() -> argparse.ArgumentParser:
             default=False,
             help="Format the output as YAML.",
         )
-    parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.set_defaults(handler=_handler)
 
     return parser
