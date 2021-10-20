@@ -76,12 +76,7 @@ def _handler(args: argparse.Namespace):
 def load_config_file(fp: Path) -> Dict[str, Any]:
     if fp.suffix in (".yml", ".yaml"):
         if yaml is None:
-            msg = (
-                f"Trying to load yaml file [{fp}] without PyYAML installed. "
-                "Install this package with the extra 'yaml' dependencies, for "
-                "example: 'pip install compile-dcm2bids-config[yaml]'"
-            )
-            raise ValueError(msg)
+            raise YamlLoadError(fp)
         return yaml.load(fp.read_text(), Loader=yaml.SafeLoader)
     return json.loads(fp.read_text())
 
@@ -89,13 +84,7 @@ def load_config_file(fp: Path) -> Dict[str, Any]:
 def serialize_config(data: Dict[str, Any], to_yaml: bool = False) -> str:
     if to_yaml:
         if yaml is None:
-            msg = (
-                "Trying to write combined config as yaml without PyYAML installed. "
-                "Install this package with the extra 'yaml' dependencies, for "
-                "example: pip install 'compile-dcm2bids-config[yaml]'"
-            )
-            raise ValueError(msg)
-
+            raise YamlDumpError()
         return yaml.dump(data, Dumper=yaml_dumper_factory(), sort_keys=False)
     return json.dumps(data, indent=2) + "\n"
 
@@ -182,6 +171,23 @@ def update_intended_for(description: Dict[str, Any], offset: int) -> Dict[str, A
     return _description
 
 
+def yaml_dumper_factory():
+    if yaml is None:
+        msg = "Trying to create YAML Dumper class but PyYAML is not installed"
+        raise NoYamlParserError(msg)
+
+    # Custom Dumper class so that lists are indented nicely, see this
+    # issue comment: https://github.com/yaml/pyyaml/issues/234#issuecomment-765894586
+    class Dumper(yaml.Dumper):
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow=flow, indentless=False)
+
+    return Dumper
+
+
+# --- EXCEPTIONS ---
+
+
 class ConfigurationConflictError(ValueError):
     """Conflicting configuration values"""
 
@@ -203,18 +209,35 @@ class DescriptionIdError(ConfigurationConflictError):
         super().__init__(f"Found multiple descriptions with ID [{description_id!r}]")
 
 
-def yaml_dumper_factory():
-    if yaml is None:
-        msg = "Trying to create YAML Dumper class but PyYAML is not installed"
-        raise ValueError(msg)
+class NoYamlParserError(ValueError):
+    def __init__(self, msg: str | None):
+        default_message = "Trying to process YAML data with no YAML parser installed"
+        super().__init__(msg or default_message)
 
-    # Custom Dumper class so that lists are indented nicely, see this
-    # issue comment: https://github.com/yaml/pyyaml/issues/234#issuecomment-765894586
-    class Dumper(yaml.Dumper):
-        def increase_indent(self, flow=False, indentless=False):
-            return super().increase_indent(flow=flow, indentless=False)
 
-    return Dumper
+class YamlLoadError(NoYamlParserError):
+    def __init__(self, fp: Path):
+        self.fp = fp
+        super().__init__(self._format_message(fp))
+
+    def _format_message(self, fp: Path) -> str:
+        return (
+            f"Trying to load yaml file [{fp}] without PyYAML installed. "
+            "Install this package with the extra 'yaml' dependencies, for "
+            "example: 'pip install compile-dcm2bids-config[yaml]'"
+        )
+
+
+class YamlDumpError(NoYamlParserError):
+    def __init__(self):
+        super().__init__(self._format_message())
+
+    def _format_message(self) -> str:
+        return (
+            "Trying to write combined config as yaml without PyYAML installed. "
+            "Install this package with the extra 'yaml' dependencies, for "
+            "example: pip install 'compile-dcm2bids-config[yaml]'"
+        )
 
 
 if __name__ == "__main__":
