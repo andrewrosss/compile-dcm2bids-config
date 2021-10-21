@@ -5,7 +5,14 @@ from typing import List
 import pytest
 from compile_dcm2bids_config import combine_config
 from compile_dcm2bids_config import DescriptionIdError
+from compile_dcm2bids_config import load_config_file
+from compile_dcm2bids_config import serialize_config
 from compile_dcm2bids_config import TopLevelParameterError
+from compile_dcm2bids_config import update_intended_for
+from compile_dcm2bids_config import yaml_dumper_factory
+from compile_dcm2bids_config import YamlDumpError
+from compile_dcm2bids_config import YamlLoadError
+from compile_dcm2bids_config import YamlParserNotFoundError
 
 
 class TestCombineConfigs:
@@ -45,7 +52,9 @@ class TestCombineConfigs:
             # multiple configs, descriptions with integer IntendedFor
             (
                 [
+                    {},  # config w/out descriptions key
                     {"descriptions": [{}, {"IntendedFor": 0}, {}, {"IntendedFor": 2}]},
+                    {},  # config w/out descriptions key
                     {"descriptions": [{}, {}, {"IntendedFor": 1}, {}]},
                 ],
                 {
@@ -403,6 +412,18 @@ class TestCombineConfigs:
         assert output_config == expected_config
 
     @pytest.mark.parametrize(
+        ("description",),
+        [
+            ({"IntendedFor": set()},),
+            ({"IntendedFor": [set(), dict()]},),
+            ({"IntendedFor": YamlParserNotFoundError("test")},),
+        ],
+    )
+    def test_update_intended_for_raises_with_bad_IntendedFor_types(self, description):
+        with pytest.raises(ValueError):
+            update_intended_for(description, 0)
+
+    @pytest.mark.parametrize(
         ("configs", "expected"),
         [
             (
@@ -479,3 +500,18 @@ class TestCombineConfigs:
     def test_combining_with_duplicate_ids(self, configs):
         with pytest.raises(DescriptionIdError):
             combine_config(configs)
+
+
+class TestWithMissingYamlPackage:
+    def test_yaml_dumper_factory_raises(self, yaml_not_found):
+        with pytest.raises(YamlParserNotFoundError):
+            yaml_dumper_factory()
+
+    def test_load_config_file_raises(self, yaml_not_found, datadir):
+        config_file = datadir / "config3.yaml"
+        with pytest.raises(YamlLoadError):
+            load_config_file(config_file)
+
+    def test_serialize_config_raises(self, yaml_not_found):
+        with pytest.raises(YamlDumpError):
+            serialize_config({}, to_yaml=True)
