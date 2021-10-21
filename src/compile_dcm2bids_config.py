@@ -13,8 +13,8 @@ from typing import Union
 
 try:
     import yaml  # type: ignore
-except ImportError:
-    yaml = None
+except ImportError:  # pragma: no cover
+    yaml = None  # pragma: no cover
 
 
 __version__ = "1.4.1"
@@ -27,7 +27,7 @@ def main():
     if hasattr(args, "handler"):
         return args.handler(args)
 
-    parser.print_help()
+    parser.print_help()  # pragma: no cover
 
 
 def _create_parser() -> argparse.ArgumentParser:
@@ -174,7 +174,7 @@ def update_intended_for(description: Dict[str, Any], offset: int) -> Dict[str, A
 def yaml_dumper_factory():
     if yaml is None:
         msg = "Trying to create YAML Dumper class but PyYAML is not installed"
-        raise NoYamlParserError(msg)
+        raise YamlParserNotFoundError(msg)
 
     # Custom Dumper class so that lists are indented nicely, see this
     # issue comment: https://github.com/yaml/pyyaml/issues/234#issuecomment-765894586
@@ -209,13 +209,13 @@ class DescriptionIdError(ConfigurationConflictError):
         super().__init__(f"Found multiple descriptions with ID [{description_id!r}]")
 
 
-class NoYamlParserError(ValueError):
+class YamlParserNotFoundError(ValueError):
     def __init__(self, msg: Union[str, None]):
         default_message = "Trying to process YAML data with no YAML parser installed"
         super().__init__(msg or default_message)
 
 
-class YamlLoadError(NoYamlParserError):
+class YamlLoadError(YamlParserNotFoundError):
     def __init__(self, fp: Path):
         self.fp = fp
         super().__init__(self._format_message(fp))
@@ -228,7 +228,7 @@ class YamlLoadError(NoYamlParserError):
         )
 
 
-class YamlDumpError(NoYamlParserError):
+class YamlDumpError(YamlParserNotFoundError):
     def __init__(self):
         super().__init__(self._format_message())
 
@@ -241,4 +241,4 @@ class YamlDumpError(NoYamlParserError):
 
 
 if __name__ == "__main__":
-    exit(main())
+    raise SystemExit(main())  # pragma: no cover
