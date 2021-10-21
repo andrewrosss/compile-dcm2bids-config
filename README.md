@@ -1,6 +1,6 @@
 # compile-dcm2bids-config
 
-Combine [`dcm2bids`](https://github.com/unfmontreal/Dcm2Bids) config files into a single config file while preserving the integrity of each separate config file's various `IntendedFor` fields.
+Combine [`dcm2bids`](https://github.com/unfmontreal/Dcm2Bids) and [`d2b`](https://github.com/d2b-dev/d2b) config files into a single config file while preserving the integrity of each separate config file's various `IntendedFor` fields.
 
 [![PyPI Version](https://img.shields.io/pypi/v/compile-dcm2bids-config.svg)](https://pypi.org/project/compile-dcm2bids-config/) [![codecov](https://codecov.io/gh/andrewrosss/compile-dcm2bids-config/branch/master/graph/badge.svg?token=BrgPPqwxv4)](https://codecov.io/gh/andrewrosss/compile-dcm2bids-config)
 [![Tests](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/test.yaml/badge.svg)](https://github.com/andrewrosss/compile-dcm2bids-config/actions/workflows/test.yaml)
@@ -221,6 +221,32 @@ The result being:
                    'modalityLabel': 'fmap',
                    'criteria': {'SidecarFilename': '*echo-3*'},
                    'IntendedFor': [2, 'my-func']}]}
+```
+
+## YAML Configuration Files
+
+This package can handle [`dcm2bids`](https://github.com/unfmontreal/Dcm2Bids) (or [`d2b`](https://github.com/d2b-dev/d2b)) configuration files written in YAML, the user just has to install the `PyYAML` package, either separately:
+
+```bash
+pip install pyyaml
+```
+
+or all at once via the installation "extra":
+
+```bash
+pip install 'compile-dcm2bids-config[yaml]'
+```
+
+If PyYAML is available, then configuration files ending with `.yml` or `.yaml` can be passed as input files:
+
+```bash
+compile-dcm2bids-config config1.json config2.yaml > combined.json
+```
+
+The combined configuration file can also be formatted as YAML by adding the `--to-yaml` flag:
+
+```bash
+compile-dcm2bids-config --to-yaml config1.json config2.yaml > combined.yaml
 ```
 
 ## Contributing
