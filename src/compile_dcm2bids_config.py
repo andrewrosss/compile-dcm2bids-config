@@ -17,7 +17,7 @@ except ImportError:  # pragma: no cover
     yaml = None  # pragma: no cover
 
 
-__version__ = "1.4.2"
+__version__ = "1.4.3"
 
 
 def main():
