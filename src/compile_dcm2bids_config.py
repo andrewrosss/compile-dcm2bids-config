@@ -30,17 +30,24 @@ def main():
     parser.print_help()  # pragma: no cover
 
 
-def _create_parser() -> argparse.ArgumentParser:
-    description = "Combine multiple dcm2bids config files into a single config file."
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument(
+def _create_parser(
+    parser: Union[argparse.ArgumentParser, None] = None,
+) -> argparse.ArgumentParser:
+    # setup the parser
+    if parser is None:
+        desc = "Combine multiple dcm2bids config files into a single config file."
+        _parser = argparse.ArgumentParser(description=desc)
+    else:
+        _parser = parser
+
+    _parser.add_argument(
         "in_file",
         nargs="+",
         type=Path,
         help="The JSON config files to combine",
     )
-    parser.add_argument("-v", "--version", action="version", version=__version__)
-    parser.add_argument(
+    _parser.add_argument("-v", "--version", action="version", version=__version__)
+    _parser.add_argument(
         "-o",
         "--out-file",
         type=argparse.FileType("w", encoding="utf8"),
@@ -49,15 +56,15 @@ def _create_parser() -> argparse.ArgumentParser:
         "specified outputs are written to stdout.",
     )
     if yaml is not None:
-        parser.add_argument(
+        _parser.add_argument(
             "--to-yaml",
             action="store_true",
             default=False,
             help="Format the output as YAML.",
         )
-    parser.set_defaults(handler=_handler)
+    _parser.set_defaults(handler=_handler)
 
-    return parser
+    return _parser
 
 
 def _handler(args: argparse.Namespace):
